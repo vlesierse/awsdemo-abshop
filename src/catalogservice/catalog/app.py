@@ -16,10 +16,7 @@
 #
 
 import boto3
-from flask import Flask, g 
-
-from aws_xray_sdk.core import xray_recorder, patch_all
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+from flask import Flask, g
 
 from catalog.api.routes import api
 
@@ -31,12 +28,6 @@ def create_app(config=None, testing=False):
     configure_app(app, testing)
 
     register_blueprints(app)
-
-    plugins = ('EC2Plugin', 'ECSPlugin')
-    xray_recorder.configure(service='catalogservice',plugins=plugins)
-    XRayMiddleware(app, xray_recorder)
-
-    patch_all()
 
     return app
 

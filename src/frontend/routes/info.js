@@ -15,35 +15,12 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var logger = require("morgan");
+const router = require('express').Router();
+const env = require("env-var");
 
-var healthRouter = require("./routes/health");
-var indexRouter = require("./routes/index");
-
-var app = express();
-
-app.use(logger("combined"));
-app.use(express.static(path.join(__dirname, "public/images/static")));
-
-app.use("/healthz", healthRouter);
-
-app.use("/", indexRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+/* GET health check */
+router.get('*', function(req, res, next) {
+  res.status(200).send(JSON.stringify({ version: env.get("VERSION", "v1").asString() }));
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  console.log(err);
-
-  // Respond with a error image
-  res.sendFile(path.join(__dirname, "public/static/error.jpg"));
-});
-
-module.exports = app;
+module.exports = router;

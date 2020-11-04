@@ -17,11 +17,7 @@
 
 // Set config defaults when creating the instance
 const axios = require("axios");
-const AWSXRay = require('aws-xray-sdk');
-AWSXRay.captureHTTPsGlobal(require('http'));
 const http = require('http');
-
-AWSXRay.capturePromise();
 
 const instance = axios.create({
     httpAgent: new http.Agent()

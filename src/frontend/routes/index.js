@@ -29,14 +29,14 @@ router.get("/", function(req, res, next){
   )
     .then(value => {
       res.render("index", {
-        title: "AnyCompany Shop",
+        title: "A/B Shop",
         product: value.data,
         user: req.user
       });
     })
     .catch(error => {
       res.render("index", {
-        title: "AnyCompany Shop",
+        title: "A/B Shop",
         product: undefined,
         user: req.user
       });
@@ -45,7 +45,7 @@ router.get("/", function(req, res, next){
 
 router.get("/static", function(req, res, next) {
   res.render("static", {
-    title: "AnyCompany Shop"
+    title: "A/B Shop"
   });
 });
 

@@ -16,7 +16,6 @@
 //
 
 const router = require("express").Router();
-const AWSXRay = require("aws-xray-sdk");
 const fs = require("fs");
 const path = require("path");
 
@@ -66,11 +65,8 @@ router.get("/:path-:source", function(req, res, next) {
 
   // Set the content-type of the response
   res.type("jpeg");
-  var segment = AWSXRay.getSegment();
-
-  var subsegment = segment.addNewSubsegment("ImageResize");
+  
   let f = resize(image, "jpeg", width, height, filter);
-  subsegment.close();
 
   if (f) {
     f.pipe(res);

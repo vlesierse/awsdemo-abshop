@@ -17,7 +17,6 @@
 
 const router = require("express").Router();
 const axios_client = require("../lib/ws_client");
-const AWSXRay = require('aws-xray-sdk-core');
 const env = require("env-var");
 
 /* GET list of all products. */
@@ -27,8 +26,10 @@ router.get("/", function(req, res, next) {
       "http://" + env.get("CATALOG_ENDPOINT").asString() + "/api/v1/products"
     )
     .then(function(value) {
-      res.render("products", {
-        title: "AnyCompany Shop - All Products",
+      const version = env.get("VERSION").asString();
+      const view = version ? "products-" + version : "products";
+      res.render(view, {
+        title: "A/B Shop - All Products",
         product: value.data,
         user: req.user
       });
@@ -42,9 +43,6 @@ router.get("/", function(req, res, next) {
 
 router.get("/:id", function(req, res, next) {
   var product_id = req.params["id"];
-
-  let segment = AWSXRay.getSegment()
-  segment.addAnnotation('ProductID', product_id);
 
   try {
     axios_client
@@ -67,10 +65,9 @@ router.get("/:id", function(req, res, next) {
           )
           .then(v => {
             var rec = v.data['recommendations'];
-            render(res, req, products, rec);
+            render(res, req, products, rec); 
           })
           .catch(error => {
-            console.log(error);
             render(res, req, products, undefined);
           });
       })
@@ -86,7 +83,7 @@ router.get("/:id", function(req, res, next) {
 
 function render(res, req, products, recommendations) {
   res.render("product", {
-    title: "AnyCompany Shop",
+    title: "A/B Shop",
     product: products,
     recommendations: recommendations,
     user: req.user

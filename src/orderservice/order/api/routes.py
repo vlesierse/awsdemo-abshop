@@ -18,14 +18,21 @@
 import json
 import requests
 
+import pprint
+
 from flask import Blueprint, current_app, jsonify, request
 
 api = Blueprint('api', 'api', url_prefix='/api/v1', static_url_path=None)
+
+# Metrics
+metric_orders = 0
 
 @api.route('/order', methods=['POST'])
 def post():
     """Create order"""
     args = request.get_json(force=True)
+
+    print(args)
 
     if len(args) < 10:
         return jsonify({"order_id": "", "code": 500, "status": "Incomplete arguments provided"}), 500
@@ -69,6 +76,7 @@ def post():
         # Get Cart for products
         url = 'http://' + \
             current_app.config['CATALOG_ENDPOINT'] + '/api/v1/product/' + p
+
         r = s.get(url, timeout=1)
         if r.status_code != 200:
             # Cart contained invalid products.
@@ -84,9 +92,20 @@ def post():
         "products": product_detail_list,
     }
 
+    # Increase Order Metrics
+    global metric_orders
+    metric_orders += 1
+
     return jsonify({"order_id": "1234567890", "code": 200, "status": "Order created", "data": json.dumps(order)}), 200
 
 @api.route('/healthz')
 def health():
     """Health check"""
     return 'OK'
+
+@api.route('/metrics')
+def metrics():
+    """Metrics"""
+    result = "# TYPE abshop_orders counter\n"
+    result += 'abshop_orders{version="' + current_app.config['VERSION'] + '"} ' + str(metric_orders)
+    return result

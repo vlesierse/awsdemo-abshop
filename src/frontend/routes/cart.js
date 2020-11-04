@@ -19,6 +19,7 @@ const router = require("express").Router();
 const axios_client = require("../lib/ws_client");
 const axios = require("axios");
 const env = require("env-var");
+const metrics = require("../lib/metric_store");
 
 /* GET cart page. */
 router.get("/", function(req, res, next) {
@@ -64,7 +65,7 @@ router.get("/", function(req, res, next) {
             req.session.cart_value = cart_value;
 
             res.render("cart", {
-              title: "AnyCompany Shop",
+              title: "A/B Shop",
               cart_length: cart.length,
               cart_products: cart,
               cart_value: cart_value,
@@ -108,6 +109,9 @@ router.post("/", function(req, res) {
         type: "success",
         message: "Product added to cart"
       };
+      if (req.body["type"] === "oneclick") {
+        metrics.increase('abshop_oneclick');
+      };
       res.redirect("/cart");
     })
     .catch(error => {
@@ -135,7 +139,7 @@ router.get("/checkout", function(req, res) {
   }
 
   res.render("cart_summary", {
-    title: "AnyCompany Shop -Checkout Summary",
+    title: "A/B Shop -Checkout Summary",
     cart_length: cart.length,
     cart_products: cart,
     cart_value: cart_value,
@@ -176,7 +180,7 @@ router.get("/order", function(req, res, next){
   var order_status = req.session.order_status;
 
   res.render("order", {
-    title: "AnyCompany Shop - Order completed",
+    title: "A/B Shop - Order completed",
     order: order_status,
     user: req.user
   });

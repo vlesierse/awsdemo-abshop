@@ -17,19 +17,18 @@
 
 const createError = require("http-errors");
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const path = require("path");
 const logger = require("morgan");
 const hbs = require("hbs");
 const env = require("env-var");
 
-const AWSXRay = require('aws-xray-sdk-core');
-AWSXRay.config([AWSXRay.plugins.EC2Plugin,AWSXRay.plugins.ECSPlugin]);
-const xrayExpress = require('aws-xray-sdk-express');
-
 const session = require("express-session");
 const RedisStore = require("connect-redis")(session);
 
+const infoRouter = require("./routes/info");
 const healthRouter = require("./routes/health");
+const metricsRouter = require("./routes/metrics");
 const indexRouter = require("./routes/index");
 const cartRouter = require("./routes/cart");
 const productRouter = require("./routes/product");
@@ -50,7 +49,11 @@ hbs.registerHelper("imageservice", function() {
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+app.use(cookieParser());
+
+app.use("/info", infoRouter);
 app.use("/healthz", healthRouter); // Load health route early, does not need session init etc...
+app.use("/api/v1/metrics", metricsRouter);
 
 const sessionMiddleware = session({
     store: new RedisStore({
@@ -81,8 +84,6 @@ app.use(function(req, res, next) {
   lookupSession();
 });
 
-app.use(xrayExpress.openSegment('Frontend'));
-
 app.use(express.static(path.join(__dirname, "public")));
 
 // Custom flash middleware -- from Ethan Brown's book, 'Web Development with Node & Express'
@@ -95,13 +96,12 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use(function(req, res, next){
-  if (req.session !== undefined) {
-    let segment = AWSXRay.getSegment()
-    segment.addAnnotation('UserID', req.sessionID);
+app.use(function(req, res, next) {
+  if(!req.cookies['app_version']) {
+    res.cookie('app_version', env.get("VERSION", "v1").asString(), { httpOnly: true });
   }
-  next();  
-})
+  next();
+});
 
 // Routes need to be loaded last
 app.use("/", indexRouter);
@@ -128,7 +128,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-
-app.use(xrayExpress.closeSegment());
 
 module.exports = app;

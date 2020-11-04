@@ -11,7 +11,7 @@ information to effectively respond to your bug report or contribution.
 Open the code in your favorite text editor. The source code for all services is located at the `src/` directory.
 
 ```
-cd reinvent2018-dev303-code
+cd aws-demos-abshop
 
 ./src
  |-- cartservice

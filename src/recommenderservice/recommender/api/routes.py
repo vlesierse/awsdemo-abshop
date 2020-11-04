@@ -19,8 +19,6 @@ import json
 import requests
 import random
 
-from aws_xray_sdk.core import xray_recorder
-
 from flask import Blueprint, current_app, jsonify
 
 # Static product list
