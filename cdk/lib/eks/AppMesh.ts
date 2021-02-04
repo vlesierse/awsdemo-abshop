@@ -45,6 +45,7 @@ export class AppMesh extends cdk.Construct {
     const chart = new HelmChart(this, 'Chart', {
       cluster,
       chart: 'appmesh-controller',
+      release: 'appmesh-controller',
       repository: 'https://aws.github.io/eks-charts',
       namespace: namespace,
       values: {
@@ -57,9 +58,5 @@ export class AppMesh extends cdk.Construct {
       wait: true
     });
     chart.node.addDependency(manifest);;
-  }
-
-  public addGateway() {
-
   }
 }

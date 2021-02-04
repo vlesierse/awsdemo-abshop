@@ -12,6 +12,6 @@ export interface KubernetesManifestFileProps {
 
 export class KubernetesManifestFile extends eks.KubernetesManifest {
   constructor(scope: cdk.Construct, id: string, props: KubernetesManifestFileProps) {
-    super(scope, id, { cluster: props.cluster, manifest: yaml.safeLoadAll(fs.readFileSync(path.join(__dirname, props.manifestFile), 'utf8')) });
+    super(scope, id, { cluster: props.cluster, manifest: yaml.loadAll(fs.readFileSync(path.join(__dirname, props.manifestFile), 'utf8')) });
   }
 }
