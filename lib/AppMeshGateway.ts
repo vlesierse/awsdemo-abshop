@@ -1,7 +1,7 @@
 import * as cdk from "@aws-cdk/core";
 import * as eks from "@aws-cdk/aws-eks";
 import * as iam from "@aws-cdk/aws-iam";
-import { HelmChart, KubernetesManifest } from "@aws-cdk/aws-eks";
+import { KubernetesManifest } from "@aws-cdk/aws-eks";
 
 export interface AppMeshGatewayProps {
   cluster: eks.Cluster;
@@ -17,7 +17,7 @@ export class AppMeshGateway extends cdk.Construct {
     const namespace = props.namespace ?? "default";
     const name = props.name ?? "gateway";
 
-    const serviceAccount = cluster.addServiceAccount('ServiceAccount', { namespace: 'abshop' });
+    const serviceAccount = cluster.addServiceAccount('ServiceAccount', { namespace });
     serviceAccount.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AWSAppMeshEnvoyAccess")
     );
@@ -30,8 +30,8 @@ export class AppMeshGateway extends cdk.Construct {
           apiVersion: "appmesh.k8s.aws/v1beta2",
           kind: "VirtualGateway",
           metadata: {
-            name: name,
-            namespace: namespace,
+            name,
+            namespace,
           },
           spec: {
             namespaceSelector: {
@@ -58,8 +58,8 @@ export class AppMeshGateway extends cdk.Construct {
           apiVersion: "v1",
           kind: "Service",
           metadata: {
-            name: name,
-            namespace: namespace,
+            name,
+            namespace,
             annotations: {
               "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
             },
@@ -82,8 +82,8 @@ export class AppMeshGateway extends cdk.Construct {
           apiVersion: "apps/v1",
           kind: "Deployment",
           metadata: {
-            name: name,
-            namespace: namespace,
+            name,
+            namespace,
           },
           spec: {
             replicas: 1,
