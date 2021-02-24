@@ -48,5 +48,5 @@ export class ABShopApplicationStack extends cdk.Stack {
       manifestFile: '../manifests/services/frontend.yaml',
       manifestContainerName: 'frontend'
     }).node.addDependency(application);
-  } 
+  }
 }

@@ -17,7 +17,9 @@ export class AppMeshGateway extends cdk.Construct {
     const namespace = props.namespace ?? "default";
     const name = props.name ?? "gateway";
 
-    const serviceAccount = cluster.addServiceAccount('ServiceAccount', { namespace });
+    const serviceAccount = new eks.ServiceAccount(this, 'ServiceAccount', {
+      cluster, namespace
+    });
     serviceAccount.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AWSAppMeshEnvoyAccess")
     );

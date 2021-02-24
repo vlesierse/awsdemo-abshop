@@ -36,7 +36,7 @@ export class AppMesh extends cdk.Construct {
     const serviceAccount = new eks.ServiceAccount(this, 'ServiceAccount', {
       cluster, namespace,
       name: 'appmesh-controller'
-    })
+    });
     serviceAccount.node.addDependency(manifest);
     serviceAccount.role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppMeshFullAccess'));
     serviceAccount.role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AWSCloudMapFullAccess'));
