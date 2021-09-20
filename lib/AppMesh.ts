@@ -8,11 +8,6 @@ export interface AppMeshProps {
   namespace?: string
 }
 
-export interface AppMeshProps {
-  cluster: eks.Cluster,
-  namespace?: string
-}
-
 export class AppMesh extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: AppMeshProps) {
     super(scope, id);

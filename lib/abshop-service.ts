@@ -23,11 +23,11 @@ export class ABShopService extends cdk.Construct {
 
     const manifestContainerName = props.manifestContainerName ?? id.toLowerCase();
 
-    const manifestContent = yaml.loadAll(fs.readFileSync(path.join(__dirname, props.manifestFile), 'utf8'));
-     manifestContent.filter(m => m.kind == 'Deployment').forEach(deployment => {
+    const manifestContent = yaml.loadAll(fs.readFileSync(path.join(__dirname, props.manifestFile), 'utf8')) as any;
+    manifestContent.filter((m: { kind: string; }) => m.kind == 'Deployment').forEach((deployment: { spec: { template: { spec: { containers: any[]; }; }; }; }) => {
       const container = deployment.spec.template.spec.containers.find((c: { name: string; }) => c.name.toLowerCase() == manifestContainerName);
       container.image = image.imageUri;
-    });    
+    });
     new eks.KubernetesManifest(this, 'Manifest', { cluster: props.cluster, manifest: manifestContent });
   }
 }
