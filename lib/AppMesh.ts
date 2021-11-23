@@ -1,7 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 import * as eks from '@aws-cdk/aws-eks';
 import * as iam from '@aws-cdk/aws-iam';
-import { HelmChart, KubernetesManifest } from '@aws-cdk/aws-eks';
 
 export interface AppMeshProps {
   cluster: eks.Cluster,
@@ -16,7 +15,7 @@ export class AppMesh extends cdk.Construct {
     const namespace = props.namespace ?? 'appmesh-system';
 
     // Namespace
-    const manifest = new KubernetesManifest(this, 'Namespace', {
+    const manifest = new eks.KubernetesManifest(this, 'Namespace', {
       cluster,
       manifest: [{
         apiVersion: 'v1',
@@ -37,7 +36,7 @@ export class AppMesh extends cdk.Construct {
     serviceAccount.role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AWSCloudMapFullAccess'));
 
     // Helm Chart
-    const chart = new HelmChart(this, 'Chart', {
+    const chart = new eks.HelmChart(this, 'Chart', {
       cluster,
       chart: 'appmesh-controller',
       release: 'appmesh-controller',
@@ -52,6 +51,9 @@ export class AppMesh extends cdk.Construct {
       },
       wait: true
     });
-    chart.node.addDependency(manifest);;
+    chart.node.addDependency(manifest);
+
+    // Node Policy
+    cluster.defaultNodegroup?.role?.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppMeshFullAccess'));
   }
 }

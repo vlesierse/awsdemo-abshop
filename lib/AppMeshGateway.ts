@@ -1,7 +1,6 @@
 import * as cdk from "@aws-cdk/core";
 import * as eks from "@aws-cdk/aws-eks";
 import * as iam from "@aws-cdk/aws-iam";
-import { KubernetesManifest } from "@aws-cdk/aws-eks";
 
 export interface AppMeshGatewayProps {
   cluster: eks.Cluster;
@@ -25,7 +24,7 @@ export class AppMeshGateway extends cdk.Construct {
     );
 
     // Namespace
-    new KubernetesManifest(this, "Manifest", {
+    new eks.KubernetesManifest(this, "Manifest", {
       cluster,
       manifest: [
         {
@@ -106,7 +105,7 @@ export class AppMeshGateway extends cdk.Construct {
                   {
                     name: "envoy",
                     image:
-                      "840364872350.dkr.ecr.eu-west-1.amazonaws.com/aws-appmesh-envoy:v1.16.1.0-prod",
+                      "840364872350.dkr.ecr.eu-west-1.amazonaws.com/aws-appmesh-envoy:v1.20.0.1-prod",
                     ports: [
                       {
                         containerPort: 8088,

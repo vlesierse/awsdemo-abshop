@@ -153,7 +153,7 @@ export class CloudWatchAgent extends cdk.Construct {
                 containers: [
                   {
                     name: "cloudwatch-agent",
-                    image: "amazon/cloudwatch-agent:1.247345.36b249270",
+                    image: "amazon/cloudwatch-agent:1.247348.0b251302",
                     resources: {
                       limits: {
                         cpu: "200m",
@@ -191,7 +191,7 @@ export class CloudWatchAgent extends cdk.Construct {
                       },
                       {
                         name: "CI_VERSION",
-                        value: "k8s/1.2.2",
+                        value: "k8s/1.3.8",
                       },
                     ],
                     volumeMounts: [
@@ -339,92 +339,12 @@ export class CloudWatchAgent extends cdk.Construct {
               logs: {
                 metrics_collected: {
                   prometheus: {
+                    cluster_name: cluster.clusterName,
+                    log_group_name: `"/aws/containerinsights/${cluster.clusterName}/prometheus`,
                     prometheus_config_path:
                       "/etc/prometheusconfig/prometheus.yaml",
                     emf_processor: {
-                      metric_declaration_dedup: true,
                       metric_declaration: [
-                        {
-                          "source_labels": ["Service"],
-                          "label_matcher": ".*nginx.*",
-                          "dimensions": [["Service","Namespace","ClusterName"]],
-                          "metric_selectors": [
-                            "^nginx_ingress_controller_(requests|success)$",
-                            "^nginx_ingress_controller_nginx_process_connections$",
-                            "^nginx_ingress_controller_nginx_process_connections_total$",
-                            "^nginx_ingress_controller_nginx_process_resident_memory_bytes$",
-                            "^nginx_ingress_controller_nginx_process_cpu_seconds_total$",
-                            "^nginx_ingress_controller_config_last_reload_successful$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["Service"],
-                          "label_matcher": ".*nginx.*",
-                          "dimensions": [["Service","Namespace","ClusterName","ingress"],["Service","Namespace","ClusterName","status"]],
-                          "metric_selectors": ["^nginx_ingress_controller_requests$"]
-                        },
-                        {
-                          "source_labels": ["Service", "frontend"],
-                          "label_matcher": ".*haproxy-ingress-controller.*;(httpfront-shared-frontend|httpfront-default-backend|httpsfront)",
-                          "dimensions": [["Service","Namespace","ClusterName","frontend","code"]],
-                          "metric_selectors": [
-                            "^haproxy_frontend_http_responses_total$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["Service", "backend"],
-                          "label_matcher": ".*haproxy-ingress-controller.*;(httpback-shared-backend|httpback-default-backend|httpsback-shared-backend)",
-                          "dimensions": [["Service","Namespace","ClusterName","backend","code"]],
-                          "metric_selectors": [
-                            "^haproxy_backend_http_responses_total$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["Service"],
-                          "label_matcher": ".*haproxy-ingress-controller.*",
-                          "dimensions": [["Service","Namespace","ClusterName"]],
-                          "metric_selectors": [
-                            "^haproxy_backend_up$",
-                            "^haproxy_backend_bytes_(in|out)_total$",
-                            "^haproxy_backend_connections_total$",
-                            "^haproxy_backend_connection_errors_total$",
-                            "^haproxy_backend_current_sessions$",
-                            "^haproxy_frontend_bytes_(in|out)_total$",
-                            "^haproxy_frontend_connections_total$",
-                            "^haproxy_frontend_http_requests_total$",
-                            "^haproxy_frontend_request_errors_total$",
-                            "^haproxy_frontend_requests_denied_total$",
-                            "^haproxy_frontend_current_sessions$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["Service"],
-                          "label_matcher": ".*memcached.*",
-                          "dimensions": [["Service","Namespace","ClusterName"]],
-                          "metric_selectors": [
-                            "^memcached_current_(bytes|items|connections)$",
-                            "^memcached_items_(reclaimed|evicted)_total$",
-                            "^memcached_(written|read)_bytes_total$",
-                            "^memcached_limit_bytes$",
-                            "^memcached_commands_total$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["Service", "status", "command"],
-                          "label_matcher": ".*memcached.*;hit;get",
-                          "dimensions": [["Service","Namespace","ClusterName","status","command"]],
-                          "metric_selectors": [
-                            "^memcached_commands_total$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["Service", "command"],
-                          "label_matcher": ".*memcached.*;(get|set)",
-                          "dimensions": [["Service","Namespace","ClusterName","command"]],
-                          "metric_selectors": [
-                            "^memcached_commands_total$"
-                          ]
-                        },
                         {
                           "source_labels": ["container_name"],
                           "label_matcher": "^envoy$",
@@ -449,35 +369,6 @@ export class CloudWatchAgent extends cdk.Construct {
                           "dimensions": [["ClusterName","Namespace","envoy_http_conn_manager_prefix","envoy_response_code_class"]],
                           "metric_selectors": [
                             "^envoy_http_downstream_rq_xx$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["job"],
-                          "label_matcher": "^kubernetes-pod-jmx$",
-                          "dimensions": [["ClusterName","Namespace"]],
-                          "metric_selectors": [
-                            "^jvm_threads_(current|daemon)$",
-                            "^jvm_classes_loaded$",
-                            "^java_lang_operatingsystem_(freephysicalmemorysize|totalphysicalmemorysize|freeswapspacesize|totalswapspacesize|systemcpuload|processcpuload|availableprocessors|openfiledescriptorcount)$",
-                            "^catalina_manager_(rejectedsessions|activesessions)$",
-                            "^jvm_gc_collection_seconds_(count|sum)$",
-                            "^catalina_globalrequestprocessor_(bytesreceived|bytessent|requestcount|errorcount|processingtime)$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["job"],
-                          "label_matcher": "^kubernetes-pod-jmx$",
-                          "dimensions": [["ClusterName","Namespace","area"]],
-                          "metric_selectors": [
-                            "^jvm_memory_bytes_used$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["job"],
-                          "label_matcher": "^kubernetes-pod-jmx$",
-                          "dimensions": [["ClusterName","Namespace","pool"]],
-                          "metric_selectors": [
-                            "^jvm_memory_pool_bytes_used$"
                           ]
                         },
                         {
@@ -659,7 +550,7 @@ scrape_configs:
                 containers: [
                   {
                     name: "cloudwatch-agent",
-                    image: "amazon/cloudwatch-agent:1.248913.0-prometheus",
+                    image: "amazon/cloudwatch-agent:1.247348.0b251302",
                     imagePullPolicy: "Always",
                     resources: {
                       limits: {
@@ -674,7 +565,7 @@ scrape_configs:
                     env: [
                       {
                         name: "CI_VERSION",
-                        value: "k8s/1.2.1-prometheus",
+                        value: "k8s/1.3.8",
                       },
                     ],
                     volumeMounts: [
