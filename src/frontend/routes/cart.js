@@ -22,7 +22,7 @@ const env = require("env-var");
 const metrics = require("../lib/metric_store");
 
 /* GET cart page. */
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
   var cart_products = {};
 
   var user_id = req.sessionID;
@@ -35,12 +35,12 @@ router.get("/", function(req, res, next) {
 
       var promises = [];
 
-      cart_products["items"].forEach(function(item) {
+      cart_products["items"].forEach(function (item) {
         var promise = axios_client(
           "http://" +
-            env.get("CATALOG_ENDPOINT").asString() +
-            "/api/v1/product/" +
-            item
+          env.get("CATALOG_ENDPOINT").asString() +
+          "/api/v1/product/" +
+          item
         );
 
         promises.push(promise);
@@ -52,7 +52,7 @@ router.get("/", function(req, res, next) {
       axios
         .all(promises)
         .then(
-          axios.spread(function() {
+          axios.spread(function () {
             // Both requests are now complete
             const args = Array.from(arguments);
             args.forEach(elem => {
@@ -84,7 +84,7 @@ router.get("/", function(req, res, next) {
     });
 });
 
-router.post("/", function(req, res) {
+router.post("/", function (req, res) {
   var product_id = req.body["product_id"];
 
   if (product_id === "") res.status(404).end();
@@ -109,7 +109,7 @@ router.post("/", function(req, res) {
         type: "success",
         message: "Product added to cart"
       };
-      if (req.body["type"] === "oneclick") {
+      if (req.body["type"] === "oneclick" && env.get("VERSION", "v1").asString() != "v1") {
         metrics.increase('abshop_oneclick');
       };
       res.redirect("/cart");
@@ -125,7 +125,7 @@ router.post("/", function(req, res) {
 });
 
 /* checkout flow */
-router.get("/checkout", function(req, res) {
+router.get("/checkout", function (req, res) {
   var order_process = req.session.order_process;
 
   req.session.order_process = order_process;
@@ -148,7 +148,7 @@ router.get("/checkout", function(req, res) {
   });
 });
 
-router.post("/checkout", function(req, res, next) {
+router.post("/checkout", function (req, res, next) {
   var username = "";
 
   if (req.user) {
@@ -176,7 +176,7 @@ router.post("/checkout", function(req, res, next) {
 });
 
 /* Order flow */
-router.get("/order", function(req, res, next){
+router.get("/order", function (req, res, next) {
   var order_status = req.session.order_status;
 
   res.render("order", {
@@ -186,7 +186,7 @@ router.get("/order", function(req, res, next){
   });
 });
 
-router.post("/order", function(req, res) {
+router.post("/order", function (req, res) {
   let order_status = {};
 
   // retrieve
@@ -205,9 +205,9 @@ router.post("/order", function(req, res) {
         axios_client
           .delete(
             "http://" +
-              env.get("CART_ENDPOINT").asString() +
-              "/api/v1/cart/" +
-              cart_id
+            env.get("CART_ENDPOINT").asString() +
+            "/api/v1/cart/" +
+            cart_id
           )
           .then(v => {
             // Clear from session
@@ -217,7 +217,7 @@ router.post("/order", function(req, res) {
 
             res.redirect("/cart/order");
           })
-          .catch(function(error) {
+          .catch(function (error) {
             //console.log(error);
             req.session.sessionFlash = {
               type: "danger",

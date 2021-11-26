@@ -1,6 +1,5 @@
 import * as cdk from "@aws-cdk/core";
 import * as eks from "@aws-cdk/aws-eks";
-import * as iam from "@aws-cdk/aws-iam";
 
 export interface AppMeshGatewayProps {
   cluster: eks.Cluster;
@@ -15,13 +14,6 @@ export class AppMeshGateway extends cdk.Construct {
     const { cluster } = props;
     const namespace = props.namespace ?? "default";
     const name = props.name ?? "gateway";
-
-    const serviceAccount = new eks.ServiceAccount(this, 'ServiceAccount', {
-      cluster, namespace
-    });
-    serviceAccount.role.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AWSAppMeshEnvoyAccess")
-    );
 
     // Namespace
     new eks.KubernetesManifest(this, "Manifest", {
@@ -100,7 +92,6 @@ export class AppMeshGateway extends cdk.Construct {
                 },
               },
               spec: {
-                serviceAccountName: serviceAccount.serviceAccountName,
                 containers: [
                   {
                     name: "envoy",

@@ -17,7 +17,7 @@
 
 import random
 from bs4 import BeautifulSoup
-from locust import HttpLocust, TaskSet, task
+from locust import HttpLocust, TaskSet, task, between
 
 
 def is_static_file(f):
@@ -53,6 +53,8 @@ class UserBehavior(TaskSet):
             "6464865908071",
             "0000000000000", # dummy id
         ]
+        self.versions = ["v2a", "v2b", "v2b"] # Add an additional v2b to favor this version over v2a
+        self.client.headers = { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36 (LocustIO)"}
 
     @task(2)
     def index(self):
@@ -71,12 +73,13 @@ class UserBehavior(TaskSet):
     @task
     def addToCart(self):
         product = random.choice(self.products)
+        oneclick = bool(random.getrandbits(1))
 
         self.client.get("/product/" + product)
-
         self.client.post("/cart", {
-            'product_id': product
-        })
+            'product_id': product,
+            'type': 'oneclick' if oneclick else ''
+        }, cookies={"app_version": random.choice(self.versions) if oneclick else 'v1'})
 
     @task
     def checkout(self):
@@ -102,5 +105,4 @@ class UserBehavior(TaskSet):
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    min_wait = 5000
-    max_wait = 20000
+    wait_time = between(2, 10)

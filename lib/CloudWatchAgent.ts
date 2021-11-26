@@ -340,7 +340,7 @@ export class CloudWatchAgent extends cdk.Construct {
                 metrics_collected: {
                   prometheus: {
                     cluster_name: cluster.clusterName,
-                    log_group_name: `"/aws/containerinsights/${cluster.clusterName}/prometheus`,
+                    log_group_name: `/aws/containerinsights/${cluster.clusterName}/prometheus`,
                     prometheus_config_path:
                       "/etc/prometheusconfig/prometheus.yaml",
                     emf_processor: {

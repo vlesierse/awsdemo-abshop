@@ -60,5 +60,12 @@ export class ABShopApplicationStack extends cdk.Stack {
     });
     frontend.node.addDependency(application);
     frontend.node.addDependency(gateway);
+    // Create the Load Generator
+    new ABShopService(this, 'LoadGenerator', {
+      cluster,
+      imageDirectory: '../src/loadgen',
+      manifestFile: '../manifests/services/loadgen.yaml',
+      manifestContainerName: 'loadtester'
+    }).node.addDependency(application);
   }
 }
